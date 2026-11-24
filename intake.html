@@ -1,0 +1,480 @@
+<title>Woonintake</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: één kolom formulier met tabs per kamer; op brede schermen staat de schets naast de maten. */
+:root {
+  --bg: #F2F3EF;
+  --surface: #FFFFFF;
+  --fg: #22261F;
+  --muted: #646A5E;
+  --line: #D6D9CF;
+  --accent: #4E6A37;
+  --accent-soft: #E3EAD9;
+  --glass: #5B8DB8;
+  --rad: #B9875A;
+  --warn: #A3541E;
+  --font-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Inter", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #161914; --surface: #1F231C; --fg: #E6E9E0; --muted: #9AA091; --line: #353B30;
+    --accent: #A7C383; --accent-soft: #2B3524; --glass: #86B3DA; --rad: #D3A57A; --warn: #E39565;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #161914; --surface: #1F231C; --fg: #E6E9E0; --muted: #9AA091; --line: #353B30;
+  --accent: #A7C383; --accent-soft: #2B3524; --glass: #86B3DA; --rad: #D3A57A; --warn: #E39565;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 15px; line-height: 1.5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 24px 64px;
+}
+.wrap { max-width: 980px; margin: 0 auto; display: grid; gap: 20px; }
+header { display: grid; gap: 6px; }
+h1 { font-family: var(--font-display); font-weight: 700; font-size: clamp(28px, 5vw, 40px); line-height: 1.1; margin: 0; text-wrap: balance; }
+.lede { color: var(--muted); margin: 0; max-width: 62ch; }
+.status { font-size: 13px; color: var(--muted); display: flex; gap: 8px; align-items: center; min-height: 20px; }
+.status .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+.status.bad .dot { background: var(--warn); }
+.status.bad { color: var(--warn); }
+
+nav.tabs { display: flex; gap: 6px; flex-wrap: wrap; border-bottom: 1px solid var(--line); padding-bottom: 0; }
+nav.tabs button {
+  font: 500 14px var(--font-body); color: var(--muted); background: none; border: none; cursor: pointer;
+  padding: 10px 12px; border-bottom: 2px solid transparent; margin-bottom: -1px; display: flex; gap: 8px; align-items: center;
+}
+nav.tabs button[aria-selected="true"] { color: var(--fg); border-bottom-color: var(--accent); }
+nav.tabs button:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.chip { font: 500 11px var(--font-mono); padding: 2px 7px; border-radius: 99px; background: var(--accent-soft); color: var(--accent); font-variant-numeric: tabular-nums; }
+.chip.done { background: var(--accent); color: var(--surface); }
+
+section.panel { display: grid; gap: 28px; }
+.group { display: grid; gap: 14px; }
+.group > h2 { font-family: var(--font-display); font-weight: 500; font-size: 20px; margin: 0; }
+.group > .hint { margin: -8px 0 0; }
+.fields { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px 16px; }
+.field { display: grid; gap: 5px; min-width: 0; }
+.field.wide { grid-column: 1 / -1; }
+label, .lbl { font-size: 13px; font-weight: 600; }
+.hint { font-size: 12.5px; color: var(--muted); }
+input[type=text], input[type=number], select, textarea {
+  width: 100%; font: 400 15px var(--font-body); color: var(--fg); background: var(--surface);
+  border: 1px solid var(--line); border-radius: 6px; padding: 9px 10px; min-width: 0;
+}
+input[type=number] { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+textarea { min-height: 76px; resize: vertical; }
+.unit { position: relative; }
+.unit input { padding-right: 42px; }
+.unit span { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font: 12px var(--font-mono); color: var(--muted); pointer-events: none; }
+
+.measure { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: 20px; align-items: start; }
+@media (max-width: 760px) { .measure { grid-template-columns: 1fr; } }
+.plan { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 12px; display: grid; gap: 8px; }
+.plan svg { width: 100%; height: auto; max-height: 420px; display: block; }
+.plan .legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12px; color: var(--muted); }
+.plan .legend i { display: inline-block; width: 14px; height: 4px; margin-right: 5px; vertical-align: middle; }
+.area { font: 500 13px var(--font-mono); color: var(--muted); }
+
+.els { display: grid; gap: 10px; }
+.el { display: grid; grid-template-columns: 1.3fr 0.7fr 1fr 1fr 1.4fr auto; gap: 8px; align-items: end; padding: 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+.el .field label { font-size: 11.5px; font-weight: 500; color: var(--muted); }
+.el .warn { grid-column: 1 / -1; font-size: 12.5px; color: var(--warn); }
+@media (max-width: 760px) { .el { grid-template-columns: 1fr 1fr; } .el .note { grid-column: 1 / -1; } }
+.btn { font: 600 14px var(--font-body); border-radius: 6px; padding: 9px 14px; cursor: pointer; border: 1px solid var(--line); background: var(--surface); color: var(--fg); }
+.btn.primary { background: var(--accent); color: var(--surface); border-color: var(--accent); }
+.btn.ghost { border-color: transparent; background: none; color: var(--muted); padding: 9px 8px; }
+.btn.ghost:hover { color: var(--warn); }
+.addrow { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.done-row { display: flex; gap: 10px; align-items: center; padding: 14px; border-radius: 8px; background: var(--accent-soft); }
+.done-row input { width: 18px; height: 18px; accent-color: var(--accent); }
+.done-row label { font-size: 14px; }
+.empty { color: var(--muted); font-size: 13.5px; padding: 10px 0; }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Woonintake</h1>
+    <p class="lede">Vul per kamer in wat je weet. Alles wordt vanzelf opgeslagen en ik lees het mee om het ontwerp te maken. Weet je iets niet? Laat het leeg of schrijf het bij de notities.</p>
+    <div class="status" id="status" role="status"><span class="dot"></span><span id="status-text">Gegevens laden…</span></div>
+  </header>
+  <nav class="tabs" id="tabs" role="tablist"></nav>
+  <main id="panels"></main>
+</div>
+
+<script>
+const WALLS = [
+  { v: "A", label: "A (boven)" }, { v: "B", label: "B (rechts)" },
+  { v: "C", label: "C (onder)" }, { v: "D", label: "D (links)" }
+];
+const EL_TYPES = [
+  { v: "raam", label: "Raam" }, { v: "deur", label: "Deur" }, { v: "radiator", label: "Radiator" },
+  { v: "stopcontact", label: "Stopcontact" }, { v: "tv", label: "Tv / internet" }, { v: "overig", label: "Overig (nis, balk, kolom)" }
+];
+const DIR = ["", "Noord", "Noordoost", "Oost", "Zuidoost", "Zuid", "Zuidwest", "West", "Noordwest", "Weet ik niet"];
+
+const roomCommon = [
+  { g: "Gebruik", fields: [
+    { k: "gebruik", label: "Hoe gebruik je deze kamer op een gewone dag?", type: "area", wide: true },
+    { k: "goed", label: "Wat vind je nu goed?", type: "area" },
+    { k: "storend", label: "Wat stoort je nu?", type: "area" },
+    { k: "behouden", label: "Wat blijft (meubels, kunst, lampen)?", type: "area", hint: "Met maten als je die weet." },
+    { k: "weg", label: "Wat mag weg?", type: "area" }
+  ]},
+  { g: "Afwerking nu", fields: [
+    { k: "vloer", label: "Vloer: soort en kleur", type: "text", hint: "Bijv. laminaat, licht eiken" },
+    { k: "wanden", label: "Wanden: kleur en staat", type: "text" },
+    { k: "plafond", label: "Plafond", type: "text", hint: "Bijv. wit spuitwerk, balken" },
+    { k: "lichtpunten", label: "Lichtpunten aan plafond/wand", type: "text", hint: "Aantal en waar" },
+    { k: "gordijnen", label: "Raambekleding nu", type: "text" }
+  ]}
+];
+
+const TABS = [
+  { id: "huis", label: "Huis & wensen", groups: [
+    { g: "Wie wonen er", fields: [
+      { k: "volwassenen", label: "Volwassenen", type: "num" },
+      { k: "kinderen", label: "Kinderen en leeftijden", type: "text", hint: "Bijv. 1 kind, 2 jaar" },
+      { k: "huisdieren", label: "Huisdieren", type: "text" },
+      { k: "gasten", label: "Logees of vaak bezoek?", type: "text" }
+    ]},
+    { g: "Woning en klussen", fields: [
+      { k: "woonsituatie", label: "Huur of koop", type: "select", options: ["", "Koop", "Huur, verven en boren mag", "Huur, bijna niets mag"] },
+      { k: "magNiet", label: "Wat mag niet van de verhuurder?", type: "text" },
+      { k: "klussen", label: "Hoeveel wil je zelf doen?", type: "select", options: ["", "Alleen kopen en neerzetten", "Verven en kleine klussen", "Flink zelf klussen", "Vakman inhuren"] }
+    ]},
+    { g: "Budget en planning", fields: [
+      { k: "budgetTotaal", label: "Totaalbudget", type: "num", unit: "€" },
+      { k: "budgetWoonkamer", label: "Woonkamer", type: "num", unit: "€" },
+      { k: "budgetSlaapkamer", label: "Slaapkamer", type: "num", unit: "€" },
+      { k: "budgetKeuken", label: "Keuken", type: "num", unit: "€" },
+      { k: "tijdlijn", label: "Wanneer moet het klaar zijn?", type: "text" },
+      { k: "investeren", label: "Waar mag het meeste geld naartoe?", type: "text", hint: "Bijv. goede bank, bed, verlichting" }
+    ]},
+    { g: "Smaak", fields: [
+      { k: "stijlMooi", label: "Wat vind je mooi?", type: "area", hint: "Sferen, materialen, plekken waar je je fijn voelt" },
+      { k: "stijlNiet", label: "Wat vind je juist niet mooi?", type: "area" },
+      { k: "kleurenMooi", label: "Kleuren die je fijn vindt", type: "text" },
+      { k: "kleurenNiet", label: "Kleuren die je niet wilt", type: "text" },
+      { k: "inspiratie", label: "Links naar voorbeelden", type: "area", wide: true, hint: "Pinterest, webshops, Instagram: één link per regel" }
+    ]},
+    { g: "Notities", fields: [ { k: "notities", label: "Verder nog iets?", type: "area", wide: true } ] }
+  ]},
+  { id: "woonkamer", label: "Woonkamer", room: true, groups: [
+    ...roomCommon,
+    { g: "Bank en eethoek", fields: [
+      { k: "bankBreedte", label: "Bank breedte", type: "num", unit: "cm" },
+      { k: "bankDiepte", label: "Bank diepte", type: "num", unit: "cm" },
+      { k: "bankVorm", label: "Vorm", type: "select", options: ["", "2- of 2,5-zits", "3-zits", "Hoekbank", "Met chaise longue", "Anders"] },
+      { k: "bankKleur", label: "Kleur en stof", type: "text" },
+      { k: "tafelPersonen", label: "Personen aan tafel, normaal", type: "num" },
+      { k: "tafelBezoek", label: "Personen bij bezoek", type: "num" },
+      { k: "tv", label: "Tv: ja/nee, formaat", type: "text" },
+      { k: "speelplek", label: "Waar speelt je kind nu?", type: "text" }
+    ]}
+  ]},
+  { id: "slaapkamer", label: "Slaapkamer", room: true, groups: [
+    ...roomCommon,
+    { g: "Slapen en opbergen", fields: [
+      { k: "bedmaat", label: "Bedmaat", type: "select", options: ["", "140 × 200", "160 × 200", "180 × 200", "200 × 200", "Anders"] },
+      { k: "bedBlijft", label: "Bed blijft?", type: "select", options: ["", "Ja", "Nee, nieuw bed"] },
+      { k: "kinderbed", label: "Slaapt je kind (soms) hier?", type: "text" },
+      { k: "kast", label: "Kledingkast nu", type: "text", hint: "Maten, of inbouwkast" }
+    ]}
+  ]},
+  { id: "keuken", label: "Keuken", room: true, groups: [
+    ...roomCommon,
+    { g: "Keukenblok", fields: [
+      { k: "opstelling", label: "Opstelling", type: "select", options: ["", "Rechte wand", "L-vorm", "U-vorm", "Parallel", "Met eiland", "Anders"] },
+      { k: "kastkleur", label: "Kleur kastjes", type: "text" },
+      { k: "werkblad", label: "Werkblad", type: "text" },
+      { k: "apparatuur", label: "Apparaten die zichtbaar staan", type: "text" },
+      { k: "magAanpassen", label: "Wat mag je aan de keuken veranderen?", type: "area", wide: true, hint: "Greepjes, kastfolie, verlichting onder de kastjes, wandtegels overschilderen…" }
+    ]}
+  ]}
+];
+
+const state = {};
+TABS.forEach(t => { state[t.id] = t.room ? { elementen: [] } : {}; });
+
+let db = null;
+const timers = {}, chains = {}, dirty = {};
+let readOnly = false;
+
+/* ---------- opslaan ---------- */
+function setStatus(text, bad) {
+  document.getElementById("status-text").textContent = text;
+  document.getElementById("status").classList.toggle("bad", !!bad);
+}
+function queueSave(id) {
+  updateChips();
+  if (readOnly) return;
+  if (!db) { setStatus("Opslaan werkt niet in deze weergave. Open de pagina op claude.ai.", true); return; }
+  dirty[id] = (dirty[id] || 0) + 1;
+  setStatus("Wijzigingen…");
+  clearTimeout(timers[id]);
+  timers[id] = setTimeout(() => flush(id), 700);
+}
+function flush(id) {
+  const mark = dirty[id];
+  const body = JSON.parse(JSON.stringify(state[id]));
+  body.bijgewerkt = new Date().toISOString();
+  chains[id] = (chains[id] || Promise.resolve()).then(async () => {
+    try {
+      await db.doc("intake/" + id).set(body);
+      if (dirty[id] === mark) { dirty[id] = 0; }
+      if (!Object.values(dirty).some(Boolean)) setStatus("Opgeslagen");
+    } catch (e) {
+      if (e && e.code === "invalid_argument") { readOnly = true; setStatus("Je kunt deze intake alleen bekijken, niet wijzigen.", true); }
+      else setStatus("Opslaan lukte niet. Je wijziging staat nog hier; typ verder en het wordt opnieuw geprobeerd.", true);
+    }
+  });
+}
+
+/* ---------- formulier ---------- */
+const el = (tag, attrs = {}, ...kids) => {
+  const n = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (k === "class") n.className = v; else if (k === "text") n.textContent = v; else if (v !== undefined && v !== null) n.setAttribute(k, v);
+  }
+  kids.flat().forEach(c => c && n.append(c));
+  return n;
+};
+
+function fieldControl(tabId, f) {
+  const id = `${tabId}-${f.k}`;
+  let ctl;
+  if (f.type === "area") ctl = el("textarea", { id });
+  else if (f.type === "select") { ctl = el("select", { id }); f.options.forEach(o => ctl.append(el("option", { value: o, text: o || "Kies…" }))); }
+  else ctl = el("input", { id, type: f.type === "num" ? "number" : "text", inputmode: f.type === "num" ? "decimal" : undefined, min: f.type === "num" ? "0" : undefined });
+  ctl.dataset.tab = tabId; ctl.dataset.key = f.k; ctl.dataset.kind = f.type;
+  ctl.addEventListener(f.type === "select" ? "change" : "input", () => {
+    state[tabId][f.k] = f.type === "num" ? (ctl.value === "" ? "" : Number(ctl.value)) : ctl.value;
+    if (["lengte", "breedte"].includes(f.k)) { drawPlan(tabId); renderEls(tabId, true); }
+    queueSave(tabId);
+  });
+  const wrapped = f.unit ? el("div", { class: "unit" }, ctl, el("span", { text: f.unit })) : ctl;
+  return el("div", { class: "field" + (f.wide || f.type === "area" && f.wide ? " wide" : "") },
+    el("label", { for: id, text: f.label }), wrapped, f.hint ? el("span", { class: "hint", text: f.hint }) : null);
+}
+
+function measureGroup(t) {
+  const dims = [
+    { k: "lengte", label: "Lengte (muur A en C)", type: "num", unit: "cm" },
+    { k: "breedte", label: "Breedte (muur B en D)", type: "num", unit: "cm" },
+    { k: "hoogte", label: "Plafondhoogte", type: "num", unit: "cm", hint: "In Nederland vaak rond 260 cm" },
+    { k: "vorm", label: "Vorm", type: "select", options: ["", "Rechthoek", "L-vorm", "Doorzon", "Schuine wand/zolder", "Anders"] },
+    { k: "windrichting", label: "Windrichting grootste raam", type: "select", options: DIR }
+  ];
+  const left = el("div", { class: "fields" }, dims.map(f => fieldControl(t.id, f)));
+  const plan = el("div", { class: "plan" },
+    el("div", { id: `${t.id}-plan` }),
+    el("div", { class: "area", id: `${t.id}-m2` }),
+    el("div", { class: "legend" },
+      el("span", {}, el("i", { style: "background:var(--glass)" }), "raam"),
+      el("span", {}, el("i", { style: "background:var(--accent)" }), "deur"),
+      el("span", {}, el("i", { style: "background:var(--rad)" }), "radiator"),
+      el("span", {}, "● stopcontact"), el("span", {}, "■ tv")));
+  return el("div", { class: "group" },
+    el("h2", { text: "Maten" }),
+    el("p", { class: "hint", text: "Teken de kamer als rechthoek op papier. Muur A is boven, dan met de klok mee B, C en D. Meet in centimeters." }),
+    el("div", { class: "measure" }, left, plan));
+}
+
+function elementsGroup(t) {
+  const list = el("div", { class: "els", id: `${t.id}-els` });
+  const add = el("div", { class: "addrow" }, EL_TYPES.map(ty => {
+    const b = el("button", { class: "btn", type: "button", text: "+ " + ty.label });
+    b.addEventListener("click", () => {
+      state[t.id].elementen.push({ type: ty.v, wand: "A", positie: "", breedte: ty.v === "stopcontact" || ty.v === "tv" ? "" : "", notitie: "" });
+      renderEls(t.id); drawPlan(t.id); queueSave(t.id);
+      const rows = list.querySelectorAll(".el"); rows[rows.length - 1]?.querySelector("select")?.focus();
+    });
+    return b;
+  }));
+  return el("div", { class: "group" },
+    el("h2", { text: "Ramen, deuren en vaste punten" }),
+    el("p", { class: "hint", text: "Positie meet je vanaf de hoek linksboven op je schets: bij muur A en C van links naar rechts, bij B en D van boven naar beneden." }),
+    list, add);
+}
+
+function renderEls(tabId, warningsOnly) {
+  const list = document.getElementById(`${tabId}-els`);
+  if (!list) return;
+  const s = state[tabId];
+  const wallLen = w => (w === "A" || w === "C") ? Number(s.lengte) || 0 : Number(s.breedte) || 0;
+  if (warningsOnly) {
+    list.querySelectorAll(".el").forEach((row, i) => setWarn(row, s.elementen[i], wallLen));
+    return;
+  }
+  list.replaceChildren();
+  if (!s.elementen.length) { list.append(el("p", { class: "empty", text: "Nog niets toegevoegd. Begin met de ramen en deuren." })); return; }
+  s.elementen.forEach((item, i) => {
+    const base = `${tabId}-el${i}`;
+    const sel = (key, opts) => {
+      const c = el("select", { id: `${base}-${key}` });
+      opts.forEach(o => c.append(el("option", { value: o.v, text: o.label })));
+      c.value = item[key] || opts[0].v;
+      c.addEventListener("change", () => { item[key] = c.value; drawPlan(tabId); setWarn(row, item, wallLen); queueSave(tabId); });
+      return c;
+    };
+    const num = (key) => {
+      const c = el("input", { id: `${base}-${key}`, type: "number", min: "0", inputmode: "decimal" });
+      c.value = item[key] ?? "";
+      c.addEventListener("input", () => { item[key] = c.value === "" ? "" : Number(c.value); drawPlan(tabId); setWarn(row, item, wallLen); queueSave(tabId); });
+      return el("div", { class: "unit" }, c, el("span", { text: "cm" }));
+    };
+    const note = el("input", { id: `${base}-notitie`, type: "text", placeholder: item.type === "raam" ? "Borstwering, bijv. 90 cm" : item.type === "deur" ? "Draait naar binnen/buiten" : "" });
+    note.value = item.notitie || "";
+    note.addEventListener("input", () => { item.notitie = note.value; queueSave(tabId); });
+    const del = el("button", { class: "btn ghost", type: "button", "aria-label": "Verwijder", text: "Verwijder" });
+    del.addEventListener("click", () => { s.elementen.splice(i, 1); renderEls(tabId); drawPlan(tabId); queueSave(tabId); });
+    const f = (lbl, ctl, cls) => el("div", { class: "field" + (cls ? " " + cls : "") }, el("label", { for: ctl.id || ctl.querySelector("input")?.id, text: lbl }), ctl);
+    const row = el("div", { class: "el" },
+      f("Soort", sel("type", EL_TYPES)), f("Muur", sel("wand", WALLS)),
+      f("Positie", num("positie")), f("Breedte", num("breedte")),
+      f("Notitie", note, "note"), del, el("div", { class: "warn", hidden: "" }));
+    setWarn(row, item, wallLen);
+    list.append(row);
+  });
+}
+function setWarn(row, item, wallLen) {
+  const w = row.querySelector(".warn"); const L = wallLen(item.wand);
+  const end = (Number(item.positie) || 0) + (Number(item.breedte) || 0);
+  if (L && end > L) { w.textContent = `Komt tot ${end} cm, maar muur ${item.wand} is ${L} cm. Controleer de maat.`; w.hidden = false; }
+  else w.hidden = true;
+}
+
+/* ---------- schets ---------- */
+const SVGNS = "http://www.w3.org/2000/svg";
+const sv = (tag, a) => { const n = document.createElementNS(SVGNS, tag); for (const k in a) n.setAttribute(k, a[k]); return n; };
+function drawPlan(tabId) {
+  const box = document.getElementById(`${tabId}-plan`); if (!box) return;
+  const s = state[tabId]; const L = Number(s.lengte) || 0, B = Number(s.breedte) || 0;
+  const m2 = document.getElementById(`${tabId}-m2`);
+  box.replaceChildren();
+  if (!L || !B) { box.append(el("p", { class: "empty", text: "Vul lengte en breedte in, dan verschijnt hier je schets op schaal." })); m2.textContent = ""; return; }
+  const H = Number(s.hoogte) || 0;
+  m2.textContent = `${(L * B / 10000).toLocaleString("nl-NL", { maximumFractionDigits: 1 })} m²` + (H ? ` · ${(L * B * H / 1e6).toLocaleString("nl-NL", { maximumFractionDigits: 0 })} m³` : "");
+  const M = Math.max(L, B), pad = M * 0.14, fs = M / 26, wall = Math.max(8, M / 70);
+  const svg = sv("svg", { viewBox: `${-pad} ${-pad} ${L + 2 * pad} ${B + 2 * pad}`, role: "img", "aria-label": `Schets ${L} bij ${B} cm` });
+  svg.append(sv("rect", { x: 0, y: 0, width: L, height: B, fill: "var(--bg)", stroke: "var(--fg)", "stroke-width": wall }));
+  const txt = (x, y, t, extra = {}) => { const n = sv("text", { x, y, "font-size": fs, fill: "var(--muted)", "text-anchor": "middle", "dominant-baseline": "middle", "font-family": "JetBrains Mono, monospace", ...extra }); n.textContent = t; svg.append(n); };
+  txt(L / 2, -pad * 0.62, `A · ${L} cm`); txt(L / 2, B + pad * 0.62, `C · ${L} cm`);
+  txt(L + pad * 0.55, B / 2, `B · ${B}`, { transform: `rotate(90 ${L + pad * 0.55} ${B / 2})` });
+  txt(-pad * 0.55, B / 2, `D · ${B}`, { transform: `rotate(-90 ${-pad * 0.55} ${B / 2})` });
+  const geo = { A: [[0, 0], [1, 0], [0, 1]], B: [[L, 0], [0, 1], [-1, 0]], C: [[0, B], [1, 0], [0, -1]], D: [[0, 0], [0, 1], [1, 0]] };
+  (s.elementen || []).forEach(it => {
+    const g = geo[it.wand]; if (!g) return;
+    const t = Number(it.positie) || 0, w = Number(it.breedte) || 0;
+    const [o, d, n] = g; const p0 = [o[0] + d[0] * t, o[1] + d[1] * t], p1 = [p0[0] + d[0] * w, p0[1] + d[1] * w];
+    const off = (p, k) => [p[0] + n[0] * k, p[1] + n[1] * k];
+    if ((it.type === "raam" || it.type === "deur" || it.type === "radiator" || it.type === "overig") && !w) return;
+    if (it.type === "raam") {
+      svg.append(sv("line", { x1: p0[0], y1: p0[1], x2: p1[0], y2: p1[1], stroke: "var(--surface)", "stroke-width": wall * 1.1 }));
+      svg.append(sv("line", { x1: p0[0], y1: p0[1], x2: p1[0], y2: p1[1], stroke: "var(--glass)", "stroke-width": wall * 0.7 }));
+    } else if (it.type === "deur") {
+      svg.append(sv("line", { x1: p0[0], y1: p0[1], x2: p1[0], y2: p1[1], stroke: "var(--bg)", "stroke-width": wall * 1.2 }));
+      const q = off(p0, w); const sweep = (d[0] * n[1] - d[1] * n[0]) > 0 ? 1 : 0;
+      svg.append(sv("path", { d: `M${p1[0]} ${p1[1]} A${w} ${w} 0 0 ${sweep} ${q[0]} ${q[1]} L${p0[0]} ${p0[1]}`, fill: "none", stroke: "var(--accent)", "stroke-width": wall * 0.35 }));
+    } else if (it.type === "radiator") {
+      const a = off(p0, wall), b = off(p1, wall * 2.6);
+      svg.append(sv("rect", { x: Math.min(a[0], b[0]), y: Math.min(a[1], b[1]), width: Math.abs(b[0] - a[0]) || wall, height: Math.abs(b[1] - a[1]) || wall, fill: "var(--rad)" }));
+    } else if (it.type === "stopcontact") {
+      const c = off(p0, wall * 1.6); svg.append(sv("circle", { cx: c[0], cy: c[1], r: fs * 0.32, fill: "var(--fg)" }));
+    } else if (it.type === "tv") {
+      const c = off(p0, wall * 1.6); svg.append(sv("rect", { x: c[0] - fs * 0.32, y: c[1] - fs * 0.32, width: fs * 0.64, height: fs * 0.64, fill: "var(--fg)" }));
+    } else {
+      const a = off(p0, wall * 0.6), b = off(p1, wall * 3);
+      svg.append(sv("rect", { x: Math.min(a[0], b[0]), y: Math.min(a[1], b[1]), width: Math.abs(b[0] - a[0]) || wall, height: Math.abs(b[1] - a[1]) || wall, fill: "none", stroke: "var(--muted)", "stroke-dasharray": `${wall} ${wall}`, "stroke-width": wall * 0.3 }));
+    }
+  });
+  box.append(svg);
+}
+
+/* ---------- tabs, voortgang ---------- */
+const KEYCOUNT = {
+  huis: ["volwassenen", "kinderen", "woonsituatie", "klussen", "budgetTotaal", "tijdlijn", "stijlMooi", "stijlNiet"],
+  room: ["lengte", "breedte", "hoogte", "windrichting", "vloer", "gebruik", "storend", "behouden"]
+};
+function progress(t) {
+  const s = state[t.id]; const keys = t.room ? KEYCOUNT.room : KEYCOUNT.huis;
+  let n = keys.filter(k => s[k] !== undefined && s[k] !== "").length, tot = keys.length;
+  if (t.room) { tot += 1; if ((s.elementen || []).length) n += 1; }
+  return { n, tot };
+}
+function updateChips() {
+  TABS.forEach(t => {
+    const c = document.getElementById(`chip-${t.id}`); const { n, tot } = progress(t);
+    const done = t.room ? state[t.id].klaar : n === tot;
+    c.textContent = done ? "klaar" : `${n}/${tot}`; c.classList.toggle("done", !!done);
+  });
+}
+function show(id) {
+  if (!TABS.some(t => t.id === id)) id = "huis";
+  TABS.forEach(t => {
+    document.getElementById(`tab-${t.id}`).setAttribute("aria-selected", String(t.id === id));
+    document.getElementById(`panel-${t.id}`).hidden = t.id !== id;
+  });
+  if (location.hash.slice(1) !== id) history.replaceState(null, "", "#" + id);
+}
+
+function build() {
+  const tabs = document.getElementById("tabs"), panels = document.getElementById("panels");
+  TABS.forEach(t => {
+    const b = el("button", { id: `tab-${t.id}`, role: "tab", type: "button", "aria-controls": `panel-${t.id}` }, t.label, el("span", { class: "chip", id: `chip-${t.id}` }));
+    b.addEventListener("click", () => show(t.id));
+    tabs.append(b);
+    const p = el("section", { class: "panel", id: `panel-${t.id}`, role: "tabpanel", "aria-labelledby": `tab-${t.id}` });
+    if (t.room) { p.append(measureGroup(t), elementsGroup(t)); }
+    t.groups.forEach(g => p.append(el("div", { class: "group" }, el("h2", { text: g.g }), el("div", { class: "fields" }, g.fields.map(f => fieldControl(t.id, f))))));
+    if (t.room) {
+      const cb = el("input", { type: "checkbox", id: `${t.id}-klaar` });
+      cb.addEventListener("change", () => { state[t.id].klaar = cb.checked; queueSave(t.id); });
+      p.append(el("div", { class: "done-row" }, cb, el("label", { for: `${t.id}-klaar`, text: `De ${t.label.toLowerCase()} is compleet ingevuld. Je mag aan het concept beginnen.` })));
+    }
+    panels.append(p);
+  });
+  window.addEventListener("hashchange", () => show(location.hash.slice(1)));
+  show(location.hash.slice(1));
+  TABS.forEach(t => fill(t.id));
+}
+
+function fill(id) {
+  const s = state[id]; const active = document.activeElement;
+  document.querySelectorAll(`[data-tab="${id}"]`).forEach(c => {
+    if (c === active) return;
+    const v = s[c.dataset.key]; c.value = v === undefined || v === null ? "" : v;
+  });
+  const cb = document.getElementById(`${id}-klaar`); if (cb) cb.checked = !!s.klaar;
+  const list = document.getElementById(`${id}-els`);
+  if (list && !list.contains(active)) renderEls(id);
+  drawPlan(id); updateChips();
+}
+
+/* ---------- start ---------- */
+build();
+(async () => {
+  const loadTimer = setTimeout(() => setStatus("De opgeslagen gegevens zijn nog niet bereikbaar. Je kunt al invullen.", true), 10000);
+  db = window.claude ? await window.claude.use("db") : null;
+  if (!db) { clearTimeout(loadTimer); setStatus("Opslaan werkt niet in deze weergave. Open de pagina op claude.ai om in te vullen.", true); return; }
+  db.collection("intake").onSnapshot(snap => {
+    snap.docs.forEach(d => {
+      const id = d.id; if (!state[id] || dirty[id]) return;
+      const data = { ...(d.data() || {}) }; delete data.bijgewerkt;
+      state[id] = TABS.find(t => t.id === id).room ? { elementen: [], ...data } : data;
+      fill(id);
+    });
+    if (!snap.metadata.fromCache) { clearTimeout(loadTimer); if (!Object.values(dirty).some(Boolean)) setStatus("Alles is opgeslagen"); }
+  }, () => { clearTimeout(loadTimer); setStatus("De verbinding met de opslag is verbroken. Herlaad de pagina.", true); });
+})();
+</script>

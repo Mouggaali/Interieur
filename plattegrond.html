@@ -1,0 +1,193 @@
+<meta charset="utf-8">
+<title>Plattegrond Planner</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: werkblad-app. Links meubels, midden plattegrond met werkbalk, rechts eigenschappen; op telefoon onder elkaar. */
+:root {
+  --bg: #EEF0EA;
+  --surface: #FFFFFF;
+  --floor: #F7F5EF;
+  --fg: #22261F;
+  --muted: #646A5E;
+  --line: #D4D8CC;
+  --grid: #E3E6DC;
+  --accent: #4E6A37;
+  --accent-soft: #E1E9D6;
+  --glass: #4F86B5;
+  --wood: #C9A77C;
+  --fabric: #A8AE9C;
+  --rug: #D9C9AE;
+  --rad: #B9875A;
+  --warn: #B4571C;
+  --handle: #FFFFFF;
+  --font-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Inter", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #151813; --surface: #1F231C; --floor: #262A22; --fg: #E6E9E0; --muted: #9AA091; --line: #3A4034; --grid: #30352B;
+    --accent: #A7C383; --accent-soft: #2B3524; --glass: #86B3DA; --wood: #9C7B55; --fabric: #6E7566; --rug: #6B5E48; --rad: #D3A57A; --warn: #E69563; --handle: #1F231C;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #151813; --surface: #1F231C; --floor: #262A22; --fg: #E6E9E0; --muted: #9AA091; --line: #3A4034; --grid: #30352B;
+  --accent: #A7C383; --accent-soft: #2B3524; --glass: #86B3DA; --wood: #9C7B55; --fabric: #6E7566; --rug: #6B5E48; --rad: #D3A57A; --warn: #E69563; --handle: #1F231C;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body {
+  margin: 0; background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 14px; line-height: 1.45;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 16px 24px;
+}
+.app { max-width: 1440px; margin: 0 auto; display: grid; gap: 14px; }
+header { display: flex; flex-wrap: wrap; gap: 10px 20px; align-items: center; justify-content: space-between; }
+h1 { font-family: var(--font-display); font-weight: 700; font-size: 26px; margin: 0; }
+.status { font-size: 12.5px; color: var(--muted); display: flex; gap: 7px; align-items: center; }
+.status .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); flex: none; }
+.status.bad { color: var(--warn); } .status.bad .dot { background: var(--warn); }
+nav.tabs { display: flex; gap: 4px; flex-wrap: wrap; }
+nav.tabs button { font: 500 14px var(--font-body); color: var(--muted); background: none; border: 1px solid transparent; border-radius: 6px; padding: 7px 12px; cursor: pointer; }
+nav.tabs button[aria-selected="true"] { color: var(--fg); background: var(--surface); border-color: var(--line); }
+
+.work { display: grid; grid-template-columns: 210px minmax(0, 1fr) 290px; gap: 14px; align-items: start; }
+@media (max-width: 1080px) { .work { grid-template-columns: minmax(0, 1fr) 280px; } .lib { grid-column: 1 / -1; order: 2; } }
+@media (max-width: 720px) { .work { grid-template-columns: 1fr; } .lib { order: 2; } .props { order: 1; } }
+
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 12px; display: grid; gap: 12px; min-width: 0; align-content: start; }
+.card h2 { font-family: var(--font-display); font-weight: 500; font-size: 16px; margin: 0; }
+.card h3 { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin: 4px 0 0; font-weight: 600; }
+.hint { font-size: 12px; color: var(--muted); margin: 0; }
+
+.lib .scroll { display: grid; gap: 14px; max-height: calc(100vh - 230px); overflow-y: auto; padding-right: 2px; }
+@media (max-width: 1080px) { .lib .scroll { max-height: none; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); } }
+.cat { display: grid; gap: 4px; align-content: start; }
+.libitem { display: flex; justify-content: space-between; gap: 8px; align-items: center; width: 100%; text-align: left; font: 500 13px var(--font-body); color: var(--fg);
+  background: var(--bg); border: 1px solid transparent; border-radius: 6px; padding: 7px 9px; cursor: grab; touch-action: none; user-select: none; }
+.libitem:hover { border-color: var(--line); }
+.libitem span { font: 11px var(--font-mono); color: var(--muted); white-space: nowrap; }
+
+.canvas { padding: 0; gap: 0; overflow: hidden; }
+.toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+.toolbar .sp { flex: 1 1 0; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+.seg button { border: none; border-radius: 0; }
+.seg button[aria-pressed="true"], #measure[aria-pressed="true"] { background: var(--accent); color: var(--surface); border-color: var(--accent); }
+.light-stats { display: grid; grid-template-columns: 1fr auto; gap: 3px 10px; font-size: 12.5px; margin: 0; }
+.light-stats dt { color: var(--muted); } .light-stats dd { margin: 0; font-family: var(--font-mono); font-variant-numeric: tabular-nums; text-align: right; }
+input[type=range] { width: 100%; accent-color: var(--accent); }
+input[type=file] { font-size: 12.5px; max-width: 100%; }
+.check { display: flex; gap: 8px; align-items: center; font-size: 13px; font-weight: 500; }
+.variants { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+.vchip { font: 600 12.5px var(--font-body); border: 1px solid var(--line); background: var(--bg); color: var(--fg); border-radius: 99px; padding: 4px 11px; cursor: pointer; }
+.vchip[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+.meta { display: flex; flex-wrap: wrap; gap: 6px 16px; justify-content: space-between; padding: 7px 12px; font-size: 12.5px; color: var(--muted); border-bottom: 1px solid var(--line); }
+.meta b { font: 500 12.5px var(--font-mono); color: var(--fg); font-variant-numeric: tabular-nums; }
+.banner { margin: 0; padding: 8px 12px; background: var(--accent-soft); font-size: 12.5px; }
+#svg { display: block; width: 100%; height: clamp(320px, 62vh, 760px); touch-action: none; user-select: none; background: var(--surface); }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 14px; padding: 8px 12px; border-top: 1px solid var(--line); font-size: 12px; color: var(--muted); }
+.legend i { display: inline-block; width: 14px; height: 4px; vertical-align: middle; margin-right: 5px; }
+
+.compare { padding: 12px; display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
+.vcard { border: 1px solid var(--line); border-radius: 8px; padding: 10px; display: grid; gap: 8px; background: var(--bg); }
+.vcard.on { border-color: var(--accent); }
+.vcard svg { width: 100%; height: 200px; background: var(--surface); border-radius: 6px; }
+.vcard .stats { display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; font-size: 12.5px; }
+.vcard .stats dt { color: var(--muted); } .vcard .stats dd { margin: 0; font-family: var(--font-mono); font-variant-numeric: tabular-nums; text-align: right; }
+
+.row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+.field { display: grid; gap: 4px; min-width: 0; }
+label { font-size: 12px; font-weight: 600; }
+input[type=text], input[type=number], input[type=url], select { width: 100%; font: 400 14px var(--font-body); color: var(--fg); background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 7px 8px; min-width: 0; }
+input[type=number] { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.unit { position: relative; } .unit input { padding-right: 34px; } .unit span { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); font: 11px var(--font-mono); color: var(--muted); pointer-events: none; }
+.btns { display: flex; flex-wrap: wrap; gap: 6px; }
+.btn { font: 600 13px var(--font-body); border-radius: 6px; padding: 7px 11px; cursor: pointer; border: 1px solid var(--line); background: var(--surface); color: var(--fg); }
+.btn:hover:not(:disabled) { border-color: var(--muted); }
+.btn:disabled { opacity: 0.45; cursor: default; }
+.btn.sm { padding: 5px 9px; font-size: 12.5px; }
+.btn.danger { color: var(--warn); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--surface); }
+button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.list { display: grid; gap: 4px; }
+.list button { display: flex; justify-content: space-between; gap: 8px; text-align: left; font: 13px var(--font-body); color: var(--fg); background: var(--bg); border: 1px solid transparent; border-radius: 6px; padding: 6px 8px; cursor: pointer; }
+.list button span { font: 11px var(--font-mono); color: var(--muted); white-space: nowrap; }
+.empty { font-size: 12.5px; color: var(--muted); margin: 0; }
+.warnlist { display: grid; gap: 4px; font-size: 12.5px; color: var(--warn); margin: 0; padding-left: 16px; }
+.keys { font-size: 11.5px; color: var(--muted); margin: 0; }
+kbd { font: 11px var(--font-mono); border: 1px solid var(--line); border-radius: 4px; padding: 0 4px; }
+.swatches { display: flex; flex-wrap: wrap; gap: 6px; }
+.sw { width: 26px; height: 26px; border-radius: 50%; border: 2px solid var(--line); cursor: pointer; padding: 0; }
+.sw[aria-pressed="true"] { border-color: var(--fg); box-shadow: 0 0 0 2px var(--surface) inset; }
+.sw.none { background: repeating-linear-gradient(45deg, var(--bg) 0 4px, var(--line) 4px 6px); }
+.budgetbar { position: relative; height: 12px; border-radius: 99px; background: var(--bg); border: 1px solid var(--line); overflow: hidden; }
+.budgetbar .fill { position: absolute; inset: 0 auto 0 0; background: var(--accent); }
+.budgetbar .fill.over { background: var(--warn); }
+.budgetbar .min { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--fg); opacity: 0.5; }
+table.money { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+table.money td, table.money th { padding: 4px 0; border-bottom: 1px solid var(--line); text-align: left; }
+table.money th { font-weight: 600; color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; }
+table.money td.num, table.money th.num { text-align: right; font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+table.money input { width: 84px; padding: 4px 6px; font-size: 12.5px; text-align: right; }
+.advice { font-size: 13.5px; line-height: 1.55; display: grid; gap: 6px; }
+.advice h4 { margin: 8px 0 0; font-family: var(--font-display); font-weight: 500; font-size: 14.5px; }
+.advice ul, .advice ol { margin: 0; padding-left: 18px; display: grid; gap: 3px; }
+.advice p { margin: 0; }
+.thinking { color: var(--muted); font-size: 13px; }
+</style>
+
+<div class="app">
+  <header>
+    <h1>Plattegrond Planner</h1>
+    <nav class="tabs" id="tabs" role="tablist"></nav>
+    <div class="status" id="status" role="status"><span class="dot"></span><span id="status-text">Laden…</span></div>
+  </header>
+  <div class="work">
+    <aside class="card lib" aria-label="Meubels">
+      <h2>Meubels</h2>
+      <p class="hint">Sleep een meubel naar de plattegrond, of klik om het op een vrije plek te zetten. Standaardmaten zijn gangbare maten (schatting).</p>
+      <button class="btn" type="button" id="custom-btn">+ Eigen meubel</button>
+      <div class="scroll" id="lib"></div>
+    </aside>
+    <section class="card canvas" aria-label="Plattegrond">
+      <div class="toolbar">
+        <div class="seg" role="group" aria-label="Modus">
+          <button class="btn sm" type="button" id="mode-in" aria-pressed="true">Inrichten</button>
+          <button class="btn sm" type="button" id="mode-vorm" aria-pressed="false">Kamer en muren</button>
+          <button class="btn sm" type="button" id="mode-licht" aria-pressed="false">Licht</button>
+          <button class="btn sm" type="button" id="mode-3d" aria-pressed="false">3D</button>
+        </div>
+        <button class="btn sm" type="button" id="measure" aria-pressed="false" title="Meetlint: sleep om te meten">Meetlint</button>
+        <div class="variants" id="variants"></div>
+        <span class="sp"></span>
+        <button class="btn sm" type="button" id="undo" title="Ongedaan maken (Ctrl+Z)" aria-label="Ongedaan maken">↶</button>
+        <button class="btn sm" type="button" id="redo" title="Opnieuw (Ctrl+Y)" aria-label="Opnieuw">↷</button>
+        <button class="btn sm" type="button" id="zoom-out" aria-label="Uitzoomen">−</button>
+        <button class="btn sm" type="button" id="zoom-in" aria-label="Inzoomen">+</button>
+        <button class="btn sm" type="button" id="zoom-fit">Passend</button>
+        <button class="btn sm" type="button" id="png">PNG</button>
+      </div>
+      <div class="meta"><span id="dims"></span><span id="area"></span></div>
+      <p class="banner" id="banner" hidden>De kamermaat is een voorbeeld. Kies "Kamer en muren" en vul je echte maten in.</p>
+      <svg id="svg" xmlns="http://www.w3.org/2000/svg"></svg>
+      <div class="compare" id="compare" hidden></div>
+      <div class="legend">
+        <span><i style="background:var(--glass)"></i>raam</span>
+        <span><i style="background:var(--accent)"></i>deur en draaicirkel</span>
+        <span><i style="background:var(--rad)"></i>radiator</span>
+        <span><i style="background:var(--warn)"></i>onder 80 cm, overlap of melding</span>
+        <span>Raster 50 cm · scrollen of knijpen = zoomen · lege vloer slepen = schuiven</span>
+      </div>
+    </section>
+    <aside class="card props" id="props" aria-label="Eigenschappen"></aside>
+  </div>
+</div>
+
+<script src="planner.js"></script>
