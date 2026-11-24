@@ -2,6 +2,8 @@
 
 Een plattegrondplanner in de browser om kamers op schaal in te richten. Geschreven in gewone HTML en JavaScript, zonder buildstap.
 
+**Probeer het:** https://mouggaali.github.io/Interieur/ (op deze versie wordt niets opgeslagen)
+
 ## Wat het kan
 
 - **Kamers tekenen**: rechthoek, L- of U-vorm, muren verslepen, uitbouwen en inhammen, of een foto of PDF van een plattegrond overtrekken.
