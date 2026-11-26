@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="112" fill="#4E6A37"/>
+  <!-- kamer -->
+  <rect x="144" y="144" width="224" height="224" fill="none" stroke="#F3F1EA" stroke-width="32"/>
+  <!-- raam in de bovenmuur -->
+  <rect x="232" y="128" width="104" height="32" fill="#A9C7E3"/>
+  <!-- deuropening onderin -->
+  <rect x="166" y="350" width="92" height="36" fill="#4E6A37"/>
+  <path d="M258 368 A92 92 0 0 0 166 276 L166 368 Z" fill="#F3F1EA" fill-opacity="0.22"/>
+  <path d="M258 368 A92 92 0 0 0 166 276" fill="none" stroke="#F3F1EA" stroke-width="8"/>
+  <line x1="166" y1="368" x2="166" y2="276" stroke="#F3F1EA" stroke-width="14" stroke-linecap="round"/>
+  <!-- bank langs de rechtermuur -->
+  <rect x="292" y="196" width="54" height="128" rx="10" fill="#D4B88E"/>
+  <rect x="326" y="196" width="20" height="128" rx="6" fill="#B8875A"/>
+</svg>
